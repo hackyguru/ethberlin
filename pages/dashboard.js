@@ -1,3 +1,4 @@
+'use client'
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -7,16 +8,138 @@ import { Input } from "@/components/ui/input"
 import { DropdownMenuTrigger, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuItem, DropdownMenuContent, DropdownMenu, DropdownMenuCheckboxItem } from "@/components/ui/dropdown-menu"
 import { Progress } from "@/components/ui/progress"
 import { Separator } from "@/components/ui/separator"
-import { Bitcoin, BookCopy, CrossIcon, File, GitGraph, Github, Gitlab, Network, Settings, Users } from "lucide-react"
+import { Bitcoin, BookCopy, CrossIcon, File, GitGraph, Github, Gitlab, Globe, History, Network, Plus, Settings, Users } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useSession, signIn, signOut } from "next-auth/react"
 import AccessToken from "@/components/access-token"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { MultiStepLoader } from "@/components/multi-step-loader"
 import { X } from "lucide-react"
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@/components/ui/dialog"
+
+
+import lighthouse from '@lighthouse-web3/sdk'
+import { CardFooter } from "@/components/ui/card"
+
+// Waku
+import { createLightNode, waitForRemotePeer, Protocols, createEncoder, createDecoder } from "@waku/sdk";
+
+
+// Protobuf
+import protobuf from "protobufjs";
+
+import { saveRepository, getRepositories } from "@/lib/localrepo"
 
 export default function dashboard() {
+
+
     const { data: session } = useSession()
+
+
+    const [name, setName] = useState('');
+    const [description, setDescription] = useState('');
+    const [publicKey, setPublicKey] = useState('');
+    const [privateKey, setPrivateKey] = useState('');
+    const [repository, setRepository] = useState(null);
+    const [repositories, setRepositories] = useState([]);
+
+    useEffect(() => {
+        const storedRepositories = getRepositories();
+        setRepositories(storedRepositories);
+    }, []);
+
+    const handleSubmit = async () => {
+        const keyResponse = await lighthouse.generateKey("a8ba37d6.e8d6c9742f7e4a3582d19e389bff0221");
+        setPublicKey(keyResponse.data.ipnsName);
+        setPrivateKey(keyResponse.data.ipnsId);
+    };
+
+    useEffect(() => {
+        if (publicKey && privateKey) {
+            const newRepository = { name, description, publicKey, privateKey };
+            setRepository(newRepository);
+        }
+    }, [name, description, publicKey, privateKey]);
+
+    useEffect(() => {
+        if (repository) {
+            saveRepository(repository);
+        }
+    }, [repository]);
+
+
+    const [dataLimit, setDataLimit] = useState(null)
+    const [dataUsed, setDataUsed] = useState(null)
+
+
+    const [node, setNode] = useState(null)
+    const [peers, setPeers] = useState(false)
+    const [encoders, setEncoders] = useState(null)
+    const [decoders, setDecoders] = useState(null)
+    const [error, setErrror] = useState(null)
+    const [receivedData, setReceivedData] = useState(null)
+    const [sendingData, setSendingData] = useState(null)
+
+    const [aaa, setaaa] = useState(null)
+
+
+    // Choose a content topic
+    const contentTopic = "/light-guide/1/message/proto";
+
+    // Create a message structure using Protobuf
+    const ChatMessage = new protobuf.Type("ChatMessage")
+        .add(new protobuf.Field("timestamp", 1, "uint64"))
+        .add(new protobuf.Field("data", 2, "string"));
+
+    useEffect(() => {
+        const getBalance = async () => {
+            const balance = await lighthouse.getBalance("a8ba37d6.e8d6c9742f7e4a3582d19e389bff0221");
+            console.log(balance.data.dataUsed)
+            setDataUsed(balance.data.dataUsed / 1000000)
+            setDataLimit(balance.data.dataLimit / 1000000)
+        }
+        getBalance()
+    }, [])
+
+
+    useEffect(() => {
+        const setupNode = async () => {
+
+            // Create and start a Light Node
+            const node = await createLightNode({ defaultBootstrap: true });
+            await node.start();
+            setNode(node);
+            console.log("Node started!")
+
+            // Wait for a successful peer connection
+            await waitForRemotePeer(node);
+            setPeers(true)
+            console.log("Remote peers connected!")
+
+            // Create a message encoder and decoder
+            const encoder = createEncoder({
+                contentTopic: contentTopic, // message content topic
+                ephemeral: true, // allows messages not be stored on the network
+            });
+            setEncoders(encoder)
+            const decoder = createDecoder(contentTopic);
+            setDecoders(decoder)
+
+        }
+
+
+        setupNode();
+    }, []);
+
+
+
 
     return (
         <>
@@ -95,7 +218,7 @@ export default function dashboard() {
                                 <nav className="grid gap-2 text-lg font-medium">
                                     <Link className="flex items-center gap-2 text-lg font-semibold" href="#">
                                         <Package2Icon className="h-6 w-6" />
-                                        <span className="sr-only">Acme Inc</span>
+                                        <span className="sr-only">GitVault</span>
                                     </Link>
                                     <Link
                                         className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
@@ -186,10 +309,10 @@ export default function dashboard() {
                                 </CardHeader>
                                 <CardContent>
                                     <div className="flex items-center gap-2">
-                                        <span className="text-4xl font-bold">0</span>
-                                        <span className="text-sm text-muted-foreground">MB</span>
+                                        <span className="text-4xl font-bold">{dataUsed}</span>
+                                        <span className="text-sm text-muted-foreground">MB / 1073MB</span>
                                     </div>
-                                    <Progress className="mt-5" value={0} />
+                                    <Progress className="mt-5" value={dataUsed / 1073} />
                                 </CardContent>
                             </Card>
                             <Card>
@@ -207,103 +330,151 @@ export default function dashboard() {
                                     <CardDescription className="">Your Waku node has been succesfully started</CardDescription>
                                 </CardHeader>
                                 <CardContent>
-                                    <Button className="w-full mt-3">Connected</Button>
+                                    <Button variant={peers ? "" : "secondary"} className="w-full mt-3">
+                                        {
+                                            (node && peers == null) && "Initialising node..." ||
+                                            (node && !peers) && "Connecting to peers" ||
+                                            (peers && node) && "Node connected"
+                                        }
+                                    </Button>
                                 </CardContent>
                             </Card>
                         </div>
                         <h1 className="title text-5xl">Repositories</h1>
                         <Tabs defaultValue="github" className="">
-                            <TabsList className="mb-5">
-                                <TabsTrigger value="local">Local</TabsTrigger>
-                                <TabsTrigger value="github">GitHub</TabsTrigger>
-                                <TabsTrigger value="gitlab">GitLab</TabsTrigger>
-                            </TabsList>
-                            <TabsContent value="local" className="w-full">
+                            <div className="flex justify-between">
+                                <TabsList className="mb-5">
+                                    <TabsTrigger value="p2p">p2p</TabsTrigger>
+                                    <TabsTrigger value="github">GitHub</TabsTrigger>
+                                    <TabsTrigger value="gitlab">GitLab</TabsTrigger>
+                                </TabsList>
+                                <Dialog>
+                                    <DialogTrigger><Plus /></DialogTrigger>
+                                    <DialogContent>
+                                        <DialogHeader>
+                                            <DialogTitle className="mb-5">Add p2p repository</DialogTitle>
+                                            <DialogDescription>
+                                                <Tabs defaultValue="new" className="">
+                                                    <TabsList className="grid w-full grid-cols-2">
+                                                        <TabsTrigger value="new">New repository</TabsTrigger>
+                                                        <TabsTrigger value="existing">Link repository</TabsTrigger>
+                                                    </TabsList>
+                                                    <TabsContent value="new">
+                                                        <Card>
+                                                            <CardHeader>
+                                                                <CardDescription>
+                                                                    Let's create a new repository
+                                                                </CardDescription>
+                                                            </CardHeader>
+                                                            <CardContent className="space-y-2">
+                                                                <div className="space-y-1">
+                                                                    <Input value={name}
+                                                                        onChange={(e) => setName(e.target.value)} id="name" placeholder="Name" />
+
+                                                                </div>
+                                                                <div className="space-y-1">
+                                                                    <Input value={description}
+                                                                        onChange={(e) => setDescription(e.target.value)} id="description" placeholder="Description" />
+                                                                </div>
+                                                            </CardContent>
+                                                            <CardFooter className="flex justify-end">
+                                                                <Button onClick={() => {
+                                                                    handleSubmit()
+                                                                }}>Create</Button>
+                                                            </CardFooter>
+                                                        </Card>
+                                                    </TabsContent>
+                                                    <TabsContent value="existing">
+                                                        <Card>
+                                                            <CardHeader>
+                                                                <CardDescription>
+                                                                    Link an existing repository
+                                                                </CardDescription>
+                                                            </CardHeader>
+                                                            <CardContent className="space-y-2">
+                                                                <div className="space-y-1">
+                                                                    <Input id="name" placeholder="Public key" />
+                                                                </div>
+                                                                <div className="space-y-1">
+                                                                    <Input id="description" placeholder="Private key" />
+                                                                </div>
+                                                            </CardContent>
+                                                            <CardFooter>
+                                                                <Button>Link</Button>
+                                                            </CardFooter>
+                                                        </Card>
+                                                    </TabsContent>
+                                                </Tabs>
+                                            </DialogDescription>
+                                        </DialogHeader>
+                                    </DialogContent>
+                                </Dialog>
+                            </div>
+                            <TabsContent value="p2p" className="w-full">
                                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                                    <Card className="w-full">
-                                        <CardHeader className="grid  items-start gap-4 space-y-0">
-                                            <div className="space-y-1">
-                                                <div className="flex justify-between items-center mb-5">
-                                                    <CardTitle className=" text-lg">shadcn/ui</CardTitle>
-                                                    <button>
-                                                        <Network className="h-5 w-5" />
-                                                    </button>
-                                                </div>
-                                                <CardDescription>
-                                                    Beautifully designed components that you can copy and paste into your apps.
-                                                </CardDescription>
-                                            </div>
-                                        </CardHeader>
-                                        <CardContent>
-                                            <div className="flex space-x-4 text-sm text-gray-500 dark:text-gray-400 items-center justify-between">
-                                                <div className="flex space-x-4">
+                                    {repositories.map((repo, index) => (
+                                        <Dialog>
+                                            <DialogTrigger>
+                                                <Card key={index} className="w-full">
+                                                    <CardHeader className="grid  items-start gap-4 space-y-0">
+                                                        <div className="space-y-1">
+                                                            <div className="flex justify-between items-center mb-5">
+                                                                <CardTitle className=" text-lg">{repo.name}</CardTitle>
+                                                                <button>
+                                                                    <Network className="h-5 w-5" />
+                                                                </button>
+                                                            </div>
+                                                            <CardDescription className="text-start">
+                                                                {repo.description}
+                                                            </CardDescription>
+                                                        </div>
+                                                    </CardHeader>
+                                                    <CardContent>
+                                                        <div className="flex space-x-4 text-sm text-gray-500 dark:text-gray-400 items-center justify-between">
+                                                            <div className="flex space-x-4">
 
-                                                    <div className="flex items-center">
-                                                        <CircleDotIcon className="mr-1 h-3 w-3 fill-gray-900 text-gray-900" />
-                                                        TypeScript
-                                                    </div>
-                                                    <div>Updated April 2023</div>
-                                                </div>
-                                                <button className="border border-gray-600 border-opacity-50 rounded-md p-1 px-2 text-black bg-[#D4FB84]">Backup</button>
-                                            </div>
-                                        </CardContent>
-                                    </Card>
-                                    <Card className="w-full">
-                                        <CardHeader className="grid  items-start gap-4 space-y-0">
-                                            <div className="space-y-1">
-                                                <div className="flex justify-between items-center mb-5">
-                                                    <CardTitle className=" text-lg">shadcn/ui</CardTitle>
-                                                    <button>
-                                                        <Network className="h-5 w-5" />
-                                                    </button>
-                                                </div>
-                                                <CardDescription>
-                                                    Beautifully designed components that you can copy and paste into your apps.
-                                                </CardDescription>
-                                            </div>
-                                        </CardHeader>
-                                        <CardContent>
-                                            <div className="flex space-x-4 text-sm text-gray-500 dark:text-gray-400 items-center justify-between">
-                                                <div className="flex space-x-4">
+                                                                <div className="flex items-center">
+                                                                    <CircleDotIcon className="mr-1 h-3 w-3 fill-gray-900 text-gray-900" />
+                                                                    TypeScript
+                                                                </div>
+                                                                <div>Updated April 2023</div>
+                                                            </div>
+                                                            <button className="border border-gray-600 border-opacity-50 rounded-md p-1 px-2 text-black bg-[#D4FB84]">Backup</button>
+                                                        </div>
+                                                    </CardContent>
+                                                </Card>
+                                            </DialogTrigger>
+                                            <DialogContent>
+                                                <DialogHeader>
+                                                    <DialogTitle className="mb-5">{repo.name}</DialogTitle>
+                                                    <DialogDescription>
+                                                    <h1 className="my-4">Description
+                                                    <br/>
+                                                    
+                                                    <h2 className="text-[#D4FB84]">{repo.description}</h2></h1>
+                                                    <h1 className="my-4">Public Key
+                                                    <br/>
+                                                    <h2 className="text-[#D4FB84]">{repo.publicKey}</h2></h1>
+                                                    <h1 className="my-4">Private Key
+                                                    <br/>
+                                                    <h2 className="text-[#D4FB84]">{repo.privateKey}</h2>
+                                                    </h1>
+                                                    <h1 className="my-4">Resolved CID
+                                                    <br/>
+                                                    <h2 className="text-[#D4FB84]">{repo.privateKey}</h2>
+                                                    </h1>
+                                                    <div className="flex space-x-4">
 
-                                                    <div className="flex items-center">
-                                                        <CircleDotIcon className="mr-1 h-3 w-3 fill-gray-900 text-gray-900" />
-                                                        TypeScript
+                                                    <Link href="/" className="">
+                                                    <Globe />
+                                                    </Link>
+                                                    <History />
                                                     </div>
-                                                    <div>Updated April 2023</div>
-                                                </div>
-                                                <button className="border border-gray-600 border-opacity-50 rounded-md p-1 px-2 text-black bg-[#D4FB84]">Backup</button>
-                                            </div>
-                                        </CardContent>
-                                    </Card>
-                                    <Card className="w-full">
-                                        <CardHeader className="grid  items-start gap-4 space-y-0">
-                                            <div className="space-y-1">
-                                                <div className="flex justify-between items-center mb-5">
-                                                    <CardTitle className=" text-lg">shadcn/ui</CardTitle>
-                                                    <button>
-                                                        <Network className="h-5 w-5" />
-                                                    </button>
-                                                </div>
-                                                <CardDescription>
-                                                    Beautifully designed components that you can copy and paste into your apps.
-                                                </CardDescription>
-                                            </div>
-                                        </CardHeader>
-                                        <CardContent>
-                                            <div className="flex space-x-4 text-sm text-gray-500 dark:text-gray-400 items-center justify-between">
-                                                <div className="flex space-x-4">
-
-                                                    <div className="flex items-center">
-                                                        <CircleDotIcon className="mr-1 h-3 w-3 fill-gray-900 text-gray-900" />
-                                                        TypeScript
-                                                    </div>
-                                                    <div>Updated April 2023</div>
-                                                </div>
-                                                <button className="border border-gray-600 border-opacity-50 rounded-md p-1 px-2 text-black bg-[#D4FB84]">Backup</button>
-                                            </div>
-                                        </CardContent>
-                                    </Card>
+                                                    </DialogDescription>
+                                                </DialogHeader>
+                                            </DialogContent>
+                                        </Dialog>
+                                    ))}
                                 </div>
                             </TabsContent>
                             <TabsContent value="github" className="w-full">

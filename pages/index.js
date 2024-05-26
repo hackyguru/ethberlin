@@ -1,7 +1,7 @@
 import Image from "next/image";
 import { Inter } from "next/font/google";
 import { Button } from "@/components/ui/button";
-import { LogInIcon } from 'lucide-react';
+import {  LogInIcon } from 'lucide-react';
 import LoginButton from "@/components/login-btn";
 import { useSession, signIn, signOut } from "next-auth/react"
 import AccessToken from "@/components/access-token";
@@ -12,6 +12,7 @@ import { motion } from "framer-motion";
 import dynamic from "next/dynamic";
 import { FlipWords } from "@/components/ui/flip-words";
 import { redirect } from "next/navigation";
+import Link from "next/link";
 
 
 const World = dynamic(() => import("../components/ui/globe").then((m) => m.World), {
@@ -433,11 +434,13 @@ export default function Home() {
               code collaboration</h1>
             <h3 className="desc text-center mt-4 text-2xl opacity-50">censorship resistant ∙ anonymous ∙ privacy preserving</h3>
             <div className="flex justify-center mt-10 space-x-7">
+              <Link href="/dashboard">
               <button className="inline-flex h-12 animate-shimmer items-center justify-center rounded-md border border-[#D4FB84] bg-[linear-gradient(110deg,#000103,45%,#d3fb8463,55%,#000103)] bg-[length:200%_100%] px-6 font-medium text-[#D4FB84] transition-colors focus:outline-none focus:ring-2 focus:ring-[#D4FB84] focus:ring-offset-2 focus:ring-offset-[#D4FB84]">
-                Connect Wallet
+                Get started
               </button>
+              </Link>
               <button className="inline-flex h-12 items-center justify-center rounded-md border border-white border-opacity-50 bg-[length:200%_100%] px-6 font-medium text-white text-opacity-50 transition-colors focus:outline-none focus:ring-2 focus:ring-[#ffffff72] focus:ring-offset-2 focus:ring-offset-[#ffffff72]">
-                npx i -g dgit
+                npx i -g gitvault
               </button>
             </div>
           </div>

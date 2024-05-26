@@ -55,7 +55,7 @@ export default function AccessToken() {
         `https://api.github.com/repos/${owner}/${repo}/contents/backup.js`,
         {
           message: 'Added workflow',
-          content: 'Y29uc3QgbGlnaHRob3VzZSA9IHJlcXVpcmUoJ0BsaWdodGhvdXNlLXdlYjMvc2RrJyk7Cgphc3luYyBmdW5jdGlvbiBtYWluKCkgewogIGNvbnN0IGFwaUtleSA9ICI3ODAyZmVkOC42NTc3YjRmNDBjNzQ0MzU0OTM3MDRjMDViMDZiZTJiMSI7CiAgY29uc3QgdXBsb2FkUmVzcG9uc2UgPSBhd2FpdCBsaWdodGhvdXNlLnVwbG9hZCgnLi8nLCBhcGlLZXkpOwoKICBjb25zdCBjaWQgPSB1cGxvYWRSZXNwb25zZS5kYXRhLkhhc2g7CiAgY29uc29sZS5sb2coYFVwbG9hZGVkIHRvIElQRlMgOiAke2NpZH1gKTs='
+          content: 'Y29uc3QgbGlnaHRob3VzZSA9IHJlcXVpcmUoJ0BsaWdodGhvdXNlLXdlYjMvc2RrJyk7Cgphc3luYyBmdW5jdGlvbiBtYWluKCkgewogIGNvbnN0IGFwaUtleSA9ICJhOGJhMzdkNi5lOGQ2Yzk3NDJmN2U0YTM1ODJkMTllMzg5YmZmMDIyMSI7CiAgY29uc3QgdXBsb2FkUmVzcG9uc2UgPSBhd2FpdCBsaWdodGhvdXNlLnVwbG9hZCgnLi8nLCBhcGlLZXkpOwoKICBjb25zdCBjaWQgPSB1cGxvYWRSZXNwb25zZS5kYXRhLkhhc2g7CiAgY29uc29sZS5sb2coYFVwbG9hZGVkIHRvIElQRlMgOiAke2NpZH1gKTsKICBwcm9jZXNzLnN0ZG91dC53cml0ZShgOjpzZXQtb3V0cHV0IG5hbWU9Y2lkOjoke2NpZH1gKTsKfQoKbWFpbigpLmNhdGNoKChlcnJvcikgPT4gewogIGNvbnNvbGUuZXJyb3IoZXJyb3IpOwogIHByb2Nlc3MuZXhpdCgxKTsKfSk7'
         },
         {
           headers: {
@@ -72,7 +72,7 @@ export default function AccessToken() {
         `https://api.github.com/repos/${owner}/${repo}/contents/.github/workflows/hello.yml`,
         {
           message: 'Added workflow',
-          content: 'bmFtZTogQmFja3VwIFJlcG9zaXRvcnkKCm9uOgogIHB1c2g6CiAgICBicmFuY2hlczoKICAgICAgLSBtYWluCiAgcHVsbF9yZXF1ZXN0OgogICAgYnJhbmNoZXM6CiAgICAgIC0gbWFpbgogICAgdHlwZXM6IFtjbG9zZWRdCgpqb2JzOgogIGJhY2t1cDoKICAgIHJ1bnMtb246IHVidW50dS1sYXRlc3QKCiAgICBzdGVwczoKICAgIC0gbmFtZTogQ2hlY2tvdXQgcmVwb3NpdG9yeQogICAgICB1c2VzOiBhY3Rpb25zL2NoZWNrb3V0QHYzCgogICAgLSBuYW1lOiBTZXQgdXAgTm9kZS5qcwogICAgICB1c2VzOiBhY3Rpb25zL3NldHVwLW5vZGVAdjMKICAgICAgd2l0aDoKICAgICAgICBub2RlLXZlcnNpb246IDE2LngKCiAgICAtIG5hbWU6IFVwbG9hZCB0byBMaWdodGhvdXNlLnN0b3JhZ2UKICAgICAgcnVuOiB8CiAgICAgICAgbnBtIGluc3RhbGwgQGxpZ2h0aG91c2Utd2ViMy9zZGsKICAgICAgICBub2RlIGJhY2t1cC5qcwoKICAgIC0gbmFtZTogU3RvcmUgQ0lECiAgICAgIHJ1bjogZWNobyAiJHt7IHN0ZXBzLnVwbG9hZC5vdXRwdXRzLmNpZCB9fSIgPiBjaWQudHh0'
+          content: 'bmFtZTogQmFja3VwIFJlcG9zaXRvcnkKCm9uOgogIHB1c2g6CiAgICBicmFuY2hlczoKICAgICAgLSBtYWluCiAgcHVsbF9yZXF1ZXN0OgogICAgYnJhbmNoZXM6CiAgICAgIC0gbWFpbgogICAgdHlwZXM6IFtjbG9zZWRdCgpqb2JzOgogIGJhY2t1cDoKICAgIHJ1bnMtb246IHVidW50dS1sYXRlc3QKCiAgICBzdGVwczoKICAgIC0gbmFtZTogQ2hlY2tvdXQgcmVwb3NpdG9yeQogICAgICB1c2VzOiBhY3Rpb25zL2NoZWNrb3V0QHYzCgogICAgLSBuYW1lOiBTZXQgdXAgTm9kZS5qcwogICAgICB1c2VzOiBhY3Rpb25zL3NldHVwLW5vZGVAdjMKICAgICAgd2l0aDoKICAgICAgICBub2RlLXZlcnNpb246IDE2LngKCiAgICAtIG5hbWU6IFVwbG9hZCB0byBMaWdodGhvdXNlLnN0b3JhZ2UKICAgICAgZW52OgogICAgICAgIExJR0hUSE9VU0VfQVBJX0tFWTogJHt7IHNlY3JldHMuTElHSFRIT1VTRV9BUElfS0VZIH19CiAgICAgIHJ1bjogfAogICAgICAgIG5wbSBpbnN0YWxsIEBsaWdodGhvdXNlLXdlYjMvc2RrCiAgICAgICAgbm9kZSBiYWNrdXAuanMKCiAgICAtIG5hbWU6IFN0b3JlIENJRAogICAgICBydW46IGVjaG8gIiR7eyBzdGVwcy51cGxvYWQub3V0cHV0cy5jaWQgfX0iID4gY2lkLnR4dA=='
         },
         {
           headers: {
@@ -163,8 +163,9 @@ export default function AccessToken() {
                       </div>
                       <div>Updated {repo.updated_at}</div>
                     </div>
-                    <button onClick={() => {
-                      createFile(repo.owner.login, repo.name)
+                    <button onClick={async() => {
+                      setLoading(true);
+                      await createFile(repo.owner.login, repo.name); 
                     }} className="border border-gray-600 border-opacity-50 rounded-md p-1 px-2 text-black bg-[#D4FB84]">Backup</button>
                   </div>
                 </CardContent>
@@ -174,6 +175,7 @@ export default function AccessToken() {
         </div>
       </div>
     </div>
+          <MultiStepLoader loadingStates={loadingStates} loading={loading} duration={2000} />
   </div>
 }
 

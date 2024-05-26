@@ -9,6 +9,8 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@jswork/next-local-storage": "^1.0.10",
+    "@lighthouse-web3/sdk": "^0.3.3",
     "@radix-ui/react-avatar": "^1.0.4",
     "@radix-ui/react-dialog": "^1.0.5",
     "@radix-ui/react-dropdown-menu": "^2.0.6",
@@ -19,6 +21,7 @@
     "@radix-ui/react-tooltip": "^1.0.7",
     "@react-three/drei": "^9.105.6",
     "@react-three/fiber": "^8.16.6",
+    "@waku/sdk": "^0.0.24",
     "axios": "^1.6.8",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
@@ -27,6 +30,7 @@
     "next": "14.2.3",
     "next-auth": "^4.24.7",
     "next-themes": "^0.3.0",
+    "protobufjs": "^7.3.0",
     "react": "^18",
     "react-dom": "^18",
     "react-element-to-jsx-string": "^15.0.0",
